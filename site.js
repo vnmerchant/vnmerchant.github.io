@@ -23,9 +23,8 @@
   local.href = base + "latex-mode.css?v=20260816e";
 
   function isOn() {
-    var val = sessionStorage.getItem(KEY);
-    if (val === null) return true; // Default to Clean Academic / LaTeX mode
-    return val === "1";
+    // LaTeX mode is always on: the \end{document} toggle has been removed.
+    return true;
   }
 
   // shareable link: ?latex / ?latex=1 forces LaTeX mode on load.
@@ -312,13 +311,7 @@
       var qed = document.createElement("span");
       qed.className = "latex-qed";
       qed.textContent = "∎";
-      qed.title = "q.e.d. (double-click to decompile)";
-      qed.ondblclick = function () {
-        sessionStorage.setItem(KEY, "0");
-        decompileAnim(function () {
-          apply(false);
-        });
-      };
+      qed.title = "q.e.d.";
       content.appendChild(qed);
     }
 
@@ -651,16 +644,9 @@
     }
   };
 
-  var tray = document.querySelector(".tray");
-  if (tray) {
-    btn.className = "btn";
-    btn.style.cssText = "font-size:11px;padding:1px 6px;cursor:pointer;";
-    tray.insertBefore(btn, tray.firstChild);
-  } else {
-    btn.style.cssText =
-      "position:fixed;bottom:16px;right:16px;z-index:9999;font-size:11px;padding:2px 8px;cursor:pointer;";
-    document.body.appendChild(btn);
-  }
+  // The \end{document} toggle is deliberately not attached to the page: the site
+  // is always presented in LaTeX mode. Keeping it detached also means apply()
+  // cannot re-home it, since getElementById only finds it once it is in the DOM.
 
   // dark mode toggle (latex mode only)
   var DKEY = "latexDark";
