@@ -3,6 +3,6 @@ Allow: /
 
 # LLM Crawler context file
 # See llm.txt for developer/AI agent context on this site.
-# https://vinayakdtp.github.io/llm.txt
+# https://vnmerchant.github.io/llm.txt
 
-Sitemap: https://vinayakdtp.github.io/feed.xml
+Sitemap: https://vnmerchant.github.io/feed.xml

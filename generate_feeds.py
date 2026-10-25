@@ -8,7 +8,7 @@ import re
 import datetime
 import email.utils
 
-BASE_URL = "https://vinayakdtp.github.io/"
+BASE_URL = "https://vnmerchant.github.io/"
 BLOG_HTML_PATH = "blog.html"
 FEED_XML_PATH = "feed.xml"
 LLM_TXT_PATH = "llm.txt"
