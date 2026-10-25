@@ -12,6 +12,10 @@
 
 ## Articles
 
+### [Why Cross Entropy Loss is used instead of Mean Squared Error](https://vnmerchant.github.io/blog/cross-entropy-vs-mse.html)
+**Date:** 2026-10-07  
+**Description:** Why Cross Entropy Loss is used instead of Mean Squared Error - the gradient math behind softmax classifiers, by vincwx.
+
 ### [Reverse-Engineering Jane Street's ASIC](https://vinayakdtp.github.io/blog/jane-street-asic.html)
 **Date:** 2026-08-31  
 **Description:** Reverse-Engineering Jane Street's ASIC

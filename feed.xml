@@ -5,8 +5,15 @@
     <link>https://vinayakdtp.github.io/</link>
     <description>Blog posts on systems programming, compilers, reverse engineering, and digital forensics by sid.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 21 Sep 2026 16:11:38 +0000</lastBuildDate>
-    <atom:link href="https://vinayakdtp.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 25 Oct 2026 09:25:33 +0000</lastBuildDate>
+    <atom:link href="https://vnmerchant.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Why Cross Entropy Loss is used instead of Mean Squared Error</title>
+      <link>https://vnmerchant.github.io/blog/cross-entropy-vs-mse.html</link>
+      <guid isPermaLink="true">https://vnmerchant.github.io/blog/cross-entropy-vs-mse.html</guid>
+      <pubDate>Wed, 07 Oct 2026 00:00:00 +0000</pubDate>
+      <description>Why Cross Entropy Loss is used instead of Mean Squared Error - the gradient math behind softmax classifiers, by vincwx.</description>
+    </item>
     <item>
       <title>Reverse-Engineering Jane Street&apos;s ASIC</title>
       <link>https://vinayakdtp.github.io/blog/jane-street-asic.html</link>

@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Why Cross Entropy Loss is used instead of Mean Squared Error - the gradient math behind softmax classifiers, by vincwx."
+    />
+    <title>Why Cross Entropy Loss is used instead of Mean Squared Error - mechanic</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" />
+    <link rel="icon" href="../public/favicon.ico" />
+    <style>
+      /* Blog specific styles */
+      .blog-content {
+        font-family: "Verdana", sans-serif;
+        line-height: 1.6;
+        font-size: 14px;
+      }
+      .blog-content h1,
+      .blog-content h2,
+      .blog-content h3 {
+        color: #000080;
+        margin-top: 20px;
+        border-bottom: 1px dotted #ccc;
+        padding-bottom: 5px;
+      }
+      .blog-content p {
+        margin-bottom: 15px;
+      }
+      .blog-content img {
+        max-width: 100%;
+        border: 1px solid #999;
+        padding: 4px;
+        background: #fff;
+      }
+      .blog-content .img-container {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .blog-content pre {
+        background: #eee;
+        border: 1px inset #ccc;
+        padding: 10px;
+        overflow-x: auto;
+        font-family: "Courier New", monospace;
+      }
+      .blog-content code {
+        background: #f0f0f0;
+        padding: 2px 4px;
+        font-family: "Courier New", monospace;
+      }
+      .blog-content blockquote {
+        border-left: 4px solid #000080;
+        padding-left: 10px;
+        color: #555;
+        font-style: italic;
+        margin: 15px 0;
+      }
+      .blog-content ul,
+      .blog-content ol {
+        margin: 0 0 15px 22px;
+      }
+      .blog-content li {
+        margin-bottom: 8px;
+      }
+      .blog-meta {
+        color: #666;
+        font-size: 11px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+      }
+      .blog-content pre code { background: none; padding: 0; border: none; }
+      .source-note {
+        background: #ffffe1;
+        border: 1px solid #d5d5d5;
+        padding: 10px 12px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .hljs { background: #fafaf8; }
+    </style>
+  </head>
+  <body>
+    <div class="desktop flex gap-16" style="flex-direction: row">
+      <div class="sidebar-95">
+        <div class="window">
+          <div class="window-title">
+            <img
+              src="https://win98icons.alexmeub.com/icons/png/computer-3.png"
+              class="icon-16"
+              alt=""
+            />
+            Navigation
+          </div>
+          <div class="window-body" style="padding: 0">
+            <ul class="list-group" style="border: none">
+              <li class="list-group-item">
+                <a href="../index.html">
+                  <img
+                    src="https://win98icons.alexmeub.com/icons/png/directory_open_cool-1.png"
+                    class="icon-16"
+                    alt=""
+                  />
+                  Home
+                </a>
+              </li>
+              <li class="list-group-item">
+                <a href="../about.html">
+                  <img
+                    src="https://win98icons.alexmeub.com/icons/png/users-1.png"
+                    class="icon-16"
+                    alt=""
+                  />
+                  About Me
+                </a>
+              </li>
+              <li class="list-group-item">
+                <a href="../projects.html">
+                  <img
+                    src="https://win98icons.alexmeub.com/icons/png/directory_folder_options-5.png"
+                    class="icon-16"
+                    alt=""
+                  />
+                  Projects
+                </a>
+              </li>
+              <li class="list-group-item">
+                <a href="../blog.html">
+                  <img
+                    src="https://win98icons.alexmeub.com/icons/png/notepad-0.png"
+                    class="icon-16"
+                    alt=""
+                  />
+                  Blog
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="window">
+          <div class="window-title">
+            <img
+              src="https://win98icons.alexmeub.com/icons/png/gear-0.png"
+              class="icon-16"
+              alt=""
+            />
+            Actions
+          </div>
+          <div class="window-body" style="padding: 0">
+            <ul class="list-group" style="border: none">
+              <li class="list-group-item">
+                <a href="javascript:history.back()">
+                  <img
+                    src="https://win98icons.alexmeub.com/icons/png/undo-0.png"
+                    class="icon-16"
+                    alt=""
+                  />
+                  Go Back
+                </a>
+              </li>
+              <li class="list-group-item">
+                <a
+                  href="#"
+                  onclick="
+                    window.scrollTo(0, 0);
+                    return false;
+                  "
+                >
+                  <img
+                    src="https://win98icons.alexmeub.com/icons/png/arrow_up-0.png"
+                    class="icon-16"
+                    alt=""
+                  />
+                  Top of Page
+                </a>
+              </li>
+              <li class="list-group-item">
+                <a href="../blog.html">
+                  <img
+                    src="https://win98icons.alexmeub.com/icons/png/notepad-0.png"
+                    class="icon-16"
+                    alt=""
+                  />
+                  All Posts
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px;"></div>
+      </div>
+
+      <div class="content-95">
+        <div class="window" style="margin-bottom: 8px">
+          <div class="window-body" style="padding: 4px 8px; font-size: 11px">
+            <img
+              src="https://win98icons.alexmeub.com/icons/png/directory_open_cool-1.png"
+              class="icon-16"
+              alt=""
+            />
+            <a href="../index.html">Home</a> &gt;
+            <a href="../blog.html">Blog</a> &gt; Why Cross Entropy Loss is used instead of Mean Squared Error
+          </div>
+        </div>
+        <div class="window">
+          <div class="window-title">
+            <img
+              src="https://win98icons.alexmeub.com/icons/png/write_wordpad-0.png"
+              class="icon-16"
+              alt=""
+            />
+            Why Cross Entropy Loss is used instead of Mean Squared Error
+          </div>
+          <div class="window-body">
+            <div class="blog-meta">
+              <img
+                src="https://win98icons.alexmeub.com/icons/png/clock-0.png"
+                class="icon-16"
+                alt=""
+              />
+              Posted: 2026-10-07 |
+              <img
+                src="https://win98icons.alexmeub.com/icons/png/user-0.png"
+                class="icon-16"
+                alt=""
+              />
+              Author: vincwx (@aleinboii) |
+              <img
+                src="https://win98icons.alexmeub.com/icons/png/directory_listing-0.png"
+                class="icon-16"
+                alt=""
+              />
+              Category: Machine Learning
+            </div>
+            <div class="blog-meta">
+              <strong>Date:</strong> 2026-10-07 | <strong>Tags:</strong> machine learning, loss functions, backpropagation
+            </div>
+
+            <div class="source-note">
+              <strong>Source:</strong> this article was originally published by
+              <strong>vincwx</strong> (<a href="https://x.com/aleinboii" target="_blank" rel="noopener">@aleinboii</a>)
+              on X as
+              <a href="https://x.com/aleinboii/status/2107854369395753040" target="_blank" rel="noopener">“Why Cross Entropy Loss is used instead of Mean Squared Error”</a>.
+              Reproduced here with attribution; all credit belongs to the original author.
+            </div>
+
+            <div class="blog-content">
+              <p>
+                Almost a year ago when I joined my current job, a question was
+                asked in the interview that why simple mean squared error or
+                euclidean distance isn't used despite its simplicity and why CE
+                (cross entropy) became the standard first for multiple dependent
+                variable classification problems then transformers. All I knew
+                was the vanishing gradient problem.
+              </p>
+              <p>
+                I revisited the topic some time back and presenting you some fun
+                math that is the result of AI and some tinkering with chain
+                rules. Hope you enjoy!
+              </p>
+
+              <h2>Why We Can't Use MSE for Categorical Outputs</h2>
+              <p>
+                Mean Squared Error (MSE) is designed for regression tasks
+                (predicting continuous numerical values like house prices, age,
+                or temperature), whereas predicting disease and variety are
+                classification tasks (predicting discrete categorical
+                boundaries).
+              </p>
+              <p>Here is why MSE doesn't work well for this setup:</p>
+              <ul>
+                <li>
+                  <strong>Arbitrary Order and Distance:</strong> If we assign
+                  numerical values to categories (e.g.
+                  <code>category_1 = 1</code>, <code>category_2 = 2</code>,
+                  <code>category_3 = 3</code>), MSE assumes these relationships
+                  are ordinal and equidistant. Under MSE, a prediction of 3 for a
+                  true label of 1 is penalized heavily (difference of 2), while a
+                  prediction of 2 is penalized less (difference of 1). However,
+                  in classification, misclassifying a disease as normal is not
+                  "closer" or "better" than misclassifying it as
+                  <code>dead_heart</code>; all incorrect classes are equally
+                  incorrect.
+                </li>
+                <li>
+                  <strong>Probabilistic Outputs (Softmax):</strong> In
+                  classification, our model outputs a probability distribution
+                  across categories using an activation function like Softmax.
+                  Cross-Entropy loss measures the difference between two
+                  probability distributions (the model's prediction vs. the
+                  one-hot encoded true label). It is highly sensitive to the
+                  confidence of the correct class prediction (providing heavy
+                  penalties for being confidently wrong), which drives the
+                  optimization process much more effectively than measuring the
+                  squared Euclidean distance with MSE.
+                </li>
+              </ul>
+
+              <h2>Can We Just Use MSE on the Probabilities?</h2>
+              <p>
+                Yes, you can technically compute the MSE between the predicted
+                probability vector and the one-hot encoded target vector (this is
+                historically referred to as the Brier Score). However, we rarely
+                use it to train deep learning classifiers due to a few critical
+                issues with optimization:
+              </p>
+
+              <h3>Gradient Vanishing (The "Saturating" Problem)</h3>
+              <p>
+                When we use a Softmax activation at the output layer, the outputs
+                are squashed between 0 and 1.
+              </p>
+              <p>
+                If we pair Softmax with Cross-Entropy, the derivative of the loss
+                with respect to the pre-activation outputs (logits) simplifies
+                beautifully to $(p_i - y_i)$. This means the gradient is directly
+                proportional to the prediction error. Even if the model is
+                confidently wrong, it gets a strong gradient signal to correct
+                itself.
+              </p>
+              <p>
+                If we pair Softmax with MSE, the derivative includes the
+                derivative of the Softmax function itself, which contains a term
+                $p_i(1 - p_i)$. If the model predicts a probability very close to
+                0 or 1 (even if it's completely wrong, like predicting 0.0001 for
+                the correct class), $p_i(1 - p_i)$ becomes extremely close to 0.
+                This causes the gradient to vanish, meaning the model stops
+                learning and cannot easily correct its confident mistakes.
+              </p>
+
+              <h3>Non-Convex Optimization Landscape</h3>
+              <p>
+                MSE applied to Softmax probabilities leads to a highly non-convex
+                loss surface with many flat regions and local minima.
+                Cross-Entropy provides a convex loss landscape relative to the
+                logits, making optimization via gradient descent much faster and
+                more reliable.
+              </p>
+
+              <h3>Penalization of Mistakes</h3>
+              <p>
+                Cross-Entropy penalizes extreme mistakes logarithmically. If the
+                true label is 1 and the model predicts a probability of 0.001,
+                Cross-Entropy loss goes to "infinity"
+                ($-\log(0.001) \approx 6.9$), forcing the model to adjust. MSE
+                would only penalize this mistake by
+                $(1 - 0.001)^2 \approx 0.998$, which doesn't penalize confidently
+                wrong predictions aggressively enough.
+              </p>
+
+              <h2>The Mathematics: Gradient of What Exactly?</h2>
+              <p>
+                When we train a neural network, backpropagation relies on the
+                gradient of the loss ($L$) with respect to the logits ($z_i$)—which
+                are the raw, unnormalized outputs of the last linear layer of the
+                network before they are passed through the Softmax function
+                ($p_i = \operatorname{softmax}(z_i)$).
+              </p>
+              <p>
+                Let's compare the gradients of the two approaches with respect to
+                these logits ($z_i$) for a single training sample where class $k$
+                is the true class ($y_k = 1$, and $y_i = 0$ for $i \neq k$).
+              </p>
+
+              <h3>Softmax and Cross-Entropy Loss</h3>
+              <p>The Cross-Entropy loss is:</p>
+              <p>$$L_{CE} = -\log(p_k)$$</p>
+              <p>
+                Using the chain rule to find the gradient with respect to any
+                logit $z_i$:
+              </p>
+              <p>$$\frac{\partial L_{CE}}{\partial z_i} = p_i - y_i$$</p>
+              <p>
+                <strong>What this means:</strong> The gradient is incredibly
+                simple and clean. If the true label is $y_i = 1$ and our model
+                predicts $p_i = 0.01$, the gradient is $0.01 - 1 = -0.99$. This
+                is a large, strong gradient signal telling the network to
+                aggressively adjust its weights to increase $p_i$.
+              </p>
+
+              <h3>Softmax + Mean Squared Error (MSE) Loss</h3>
+              <p>
+                If we treat the probabilities as targets, the MSE loss is:
+              </p>
+              <p>$$L_{MSE} = \sum_j (p_j - y_j)^2$$</p>
+              <p>
+                Using the chain rule to find the gradient with respect to logit
+                $z_i$:
+              </p>
+              <p>
+                $$\frac{\partial L_{MSE}}{\partial z_i} = 2\sum_j (p_j - y_j)\frac{\partial p_j}{\partial z_i}$$
+              </p>
+              <p>
+                Since the derivative of Softmax is
+                $\frac{\partial p_j}{\partial z_i} = p_i(\delta_{ij} - p_j)$
+                (where $\delta_{ij} = 1$ if $i = j$ and 0 otherwise), the final
+                derivative simplifies to:
+              </p>
+              <p>
+                $$\frac{\partial L_{MSE}}{\partial z_i} = 2p_i\left((p_i - y_i) - \sum_j (p_j - y_j)p_j\right)$$
+              </p>
+              <p>
+                <strong>What this means:</strong> Notice the term $p_i$
+                multiplying the entire expression.
+              </p>
+              <p>
+                If the true label is $y_i = 1$ and our model confidently but
+                wrongly predicts $p_i \approx 0.0001$, the leading multiplier
+                $p_i$ is 0.0001.
+              </p>
+              <p>
+                Even though $(p_i - y_i) = -0.9999$ is a massive error,
+                multiplying it by 0.0001 yields a final gradient that is
+                extremely close to zero.
+              </p>
+              <p>
+                Because the gradient $\partial L/\partial z_i$ is virtually zero,
+                the weights in the preceding layers of the network receive almost
+                no update, leaving the model "stuck" in its incorrect
+                configuration.
+              </p>
+
+              <h2>Connecting the Logit Gradient to the Weights</h2>
+              <p>
+                You are 100% correct: we do not update the logits $z$ directly
+                during training; we update the network's weights ($w$).
+              </p>
+              <p>
+                However, the relationship between the loss, the logits, and the
+                weights is linked explicitly by the Chain Rule of calculus. Let's
+                look at how this connection works for any weight $w_{ij}$ in the
+                final layer of the network.
+              </p>
+
+              <h3>The Explicit Link</h3>
+              <p>
+                The logit $z_i$ is computed from the incoming activations $a_j$
+                of the previous layer and the weights $w_{ij}$:
+              </p>
+              <p>$$z_i = \sum_j w_{ij}a_j + b_i$$</p>
+              <p>
+                Because of this linear relationship, the derivative of the logit
+                with respect to its weight is simply the activation of the
+                incoming neuron:
+              </p>
+              <p>$$\frac{\partial z_i}{\partial w_{ij}} = a_j$$</p>
+              <p>
+                Now, when we want to calculate the gradient of the Loss ($L$)
+                with respect to the weight ($w_{ij}$) to perform our gradient
+                descent update, we apply the chain rule:
+              </p>
+              <p>
+                $$\frac{\partial L}{\partial w_{ij}} = \frac{\partial L}{\partial z_i}\cdot a_j$$
+              </p>
+              <p>Substituting the terms, we get,</p>
+              <p>
+                $$\frac{\partial L_{CE}}{\partial w_{ij}} = (p_i - y_i)\cdot a_j$$
+              </p>
+
+              <h3>Why the Logit Gradient Dominates</h3>
+              <p>
+                This final equation shows that the gradient of the weights is
+                directly proportional to the gradient of the logits:
+              </p>
+              <p>
+                With Cross-Entropy, we get the equation above, meanwhile with MSE,
+                we get the following:
+              </p>
+              <p>
+                $$\frac{\partial L_{MSE}}{\partial w_{ij}} = 2p_i\left((p_i - y_i) - \sum_k (p_k - y_k)p_k\right)\cdot a_j$$
+              </p>
+              <p>
+                If the prediction error is large
+                ($p_i - y_i \approx -1.0$), the weights receive a healthy, strong
+                update proportional to the incoming activation $a_j$.
+              </p>
+              <p>
+                With MSE, the weight gradient is multiplied by $p_i$. If the model
+                is confidently wrong ($p_i \approx 0$), the leading $p_i$ is 0.
+                That zeroes the left hand side of the expression.
+              </p>
+
+              <h2>Summary</h2>
+              <p>
+                Even though we are updating the weights $w$, the gradient of the
+                logits acts as a gatekeeper. If $\partial L/\partial z_i$
+                vanishes (which happens under MSE when the output saturates), then
+                the gradient for all weights connected to that neuron
+                ($\partial L/\partial w_{ij}$) also completely vanishes,
+                regardless of how large the actual error is.
+              </p>
+            </div>
+            <div class="status-bar mt-16">
+              <a href="../blog.html" class="btn">
+                <img
+                  src="https://win98icons.alexmeub.com/icons/png/undo-0.png"
+                  class="icon-16"
+                  alt=""
+                />
+                Back to All Posts
+              </a>
+            </div>
+          </div>
+        </div>
+        <div style="margin-bottom: 60px"></div>
+      </div>
+    </div>
+    <div class="taskbar">
+      <div style="display: flex; gap: 8px; flex: 1; overflow: hidden; align-items: center;">
+        <a href="/" class="start-button">
+          <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png" class="icon-16" alt="" />
+          Start
+        </a>
+      </div>
+      <div class="tray" style="display: flex; align-items: center; gap: 4px;">
+        <div style="border: 1px inset #fff; background: #fff; padding: 2px 4px; font-size: 11px; color: #000; display: flex; align-items: center; width: 140px; overflow: hidden; white-space: nowrap; font-family: 'MS Sans Serif', sans-serif;">
+          <marquee scrollamount="3" id="now-playing-marquee">🎵 now playing: ruby</marquee>
+        </div>
+        <button class="btn" id="music-prev" style="padding: 1px 6px; font-size: 10px;">&#9668;</button>
+        <button class="btn" id="music-toggle" style="padding: 1px 6px; font-size: 10px; font-weight: bold; width: 24px;">||</button>
+        <button class="btn" id="music-next" style="padding: 1px 6px; font-size: 10px;">&#9658;|</button>
+        <div class="time" id="clock">12:00 PM</div>
+      </div>
+    </div>
+    <script>
+      function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, "0");
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        document.getElementById("clock").textContent =
+          hours + ":" + minutes + " " + ampm;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js"
+      onload="
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+          ],
+          throwOnError: false,
+        });
+      "
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../site.js?v=20260816e"></script>
+  </body>
+</html>
