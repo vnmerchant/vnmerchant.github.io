@@ -748,14 +748,16 @@
     return '/';
   })();
 
+  // No audio files ship with this repo (both tracks 404), so the playlist is
+  // empty and the player is skipped entirely. Add entries back here to revive it.
   const playlist = [
-    { title: "ruby", src: _siteRoot + "public/ruby_beat.mp3" },
-    { title: "lemon tea", src: _siteRoot + "public/lemon_tea.mp3" }
+    // { title: "ruby", src: _siteRoot + "public/ruby_beat.mp3" },
+    // { title: "lemon tea", src: _siteRoot + "public/lemon_tea.mp3" }
   ];
   let currentTrackIdx = 0;
   var _clockInterval = null;
 
-  if (!document.getElementById("bg-music")) {
+  if (playlist.length && !document.getElementById("bg-music")) {
     var audio = document.createElement("audio");
     audio.id = "bg-music";
     audio.src = playlist[currentTrackIdx].src;
@@ -765,6 +767,7 @@
   
   function updateMediaUI() {
     var m = document.getElementById("bg-music");
+    if (!m) return;
     var toggle = document.getElementById("music-toggle");
     if (toggle) toggle.textContent = m.paused ? "►" : "||";
     var marquee = document.getElementById("now-playing-marquee");
@@ -773,6 +776,17 @@
 
   function setupGlobalAudio() {
     var m = document.getElementById("bg-music");
+    if (!m) {
+      // No tracks configured: hide the player controls instead of showing a
+      // dead "now playing" marquee.
+      ["music-prev", "music-toggle", "music-next"].forEach(function (id) {
+        var b = document.getElementById(id);
+        if (b) b.style.display = "none";
+      });
+      var mq = document.getElementById("now-playing-marquee");
+      if (mq && mq.parentElement) mq.parentElement.style.display = "none";
+      return;
+    }
     
     // Bind toggle button
     var toggleBtn = document.getElementById("music-toggle");
@@ -827,9 +841,9 @@
 
   setupGlobalAudio();
   _startClock();
-  if (sessionStorage.getItem("mplay") === "1") {
-    var m = document.getElementById("bg-music");
-    var p = m.play();
+  var _resumeAudio = sessionStorage.getItem("mplay") === "1" ? document.getElementById("bg-music") : null;
+  if (_resumeAudio) {
+    var p = _resumeAudio.play();
     if (p !== undefined) p.then(() => updateMediaUI()).catch(function(){});
   }
 
